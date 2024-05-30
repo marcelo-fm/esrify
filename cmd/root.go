@@ -22,7 +22,10 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"bufio"
+	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -34,13 +37,25 @@ var cfgFile string
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "esrify",
-	Short: "A brief description of your application",
-	Long: `ESRIfy is a CLI tool that converts a GeoJSON to a ESRIGeoJSON.
-
-  Usage:
-
-  cat path/to/file.json | esrify '.'
-`,
+	Short: "Convert a GeoJSON into a EsriGeoJSON",
+	Long:  ``,
+	// Args: cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		reader := bufio.NewReader(os.Stdin)
+		text, err := io.ReadAll(reader)
+		if err != nil {
+			fmt.Println("Error reading input:", err)
+			return
+		}
+		var data map[string]any
+		err = json.Unmarshal(text, &data)
+		if err != nil {
+			fmt.Println("Error unmarshaling input:", err)
+			return
+		}
+		// Process the received text.
+		fmt.Println(data)
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -78,7 +93,7 @@ func initConfig() {
 
 		// Search config in home directory with name ".esrify" (without extension).
 		viper.AddConfigPath(home)
-		viper.SetConfigType("yaml")
+		viper.SetConfigType("toml")
 		viper.SetConfigName(".esrify")
 	}
 
